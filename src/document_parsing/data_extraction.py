@@ -94,6 +94,12 @@ class MinerU_Parser():
         **Returns:**
         Parsed_JSON_file : It is the parsed data in json format.
 
+        
+        AREAS OF IMPROVEMENT:
+        Need to align the directory of the MinerU output with this as for now, we need to manually pass the address.
+
+
+
         """
     ## Let's explore the Pathlib library
 
