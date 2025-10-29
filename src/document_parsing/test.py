@@ -23,6 +23,9 @@ def format_minerU_output():
 
         **Args:**
         self.content_of_json (markdown): It is the parsed output in the JSON format.
+        ABS_PATH (Path): It is the absolute path that we need to use in order to convert the relative path of the table_image to the
+        absolute path. For now, we do not have the output of minerU path and our input path same (Because minerU is not running command statement correctly)
+        so, we are manually bringing the path of the minerU output manually. Otherwise, we would just have to import it using path.cwd().
         
         **Returns:**
         self.content_list (list): It is the list of the knowledge units that contains the information about part of the document.
@@ -32,9 +35,20 @@ def format_minerU_output():
         """
         # lets get the input of the function
         minerU_raw_output = Parsed_minerU_raw
+        ABS_PATH = Path("C:\\Users\\Hp\\MinerU")
+
 
         PDF_INFO = minerU_raw_output.get("pdf_info","")
         content_list = []
+        table_images_folder = []
+
+
+        # Let's get the directory path of the output of the minerU so, that we can create the absolute path of the table images. 
+        for items in ABS_PATH.iterdir():
+            if items.is_dir():
+                table_images_folder.append(items)
+        ABS_PATH_OUTPUT = table_images_folder[1]
+        
 
         # Lets get all the knowledge units in the content list
         for page in PDF_INFO:
@@ -42,20 +56,50 @@ def format_minerU_output():
             discarded_block = page.get("discarded_blocks","")
             para_blocks = page.get("para_blocks","")
             for para_dict_details in para_blocks:
-                para_lines = para_dict_details.get("lines","")
-                for lines_dict_details in para_lines:
-                    spans_details = lines_dict_details.get("spans","")
-                    for span_dict_details in spans_details:
-                        content_of_block_line = span_dict_details.get("content","")
-                        content_type_of_block = span_dict_details.get("type","")
-                knowledge_unit = {"page_no.":page_no, "raw_content":content_of_block_line, "content type": content_type_of_block}
-                content_list.append(knowledge_unit)
+                para_label = para_dict_details.get("type","")
+                table_blocks = para_dict_details.get("blocks","")
+                if para_label not in ["table", "text"]:
+                    continue
+                
+                # Knowledge units of textual content 
+                if para_label == "text":
+                    para_lines = para_dict_details.get("lines","")
+                    for lines_dict_details in para_lines:
+                        spans_details = lines_dict_details.get("spans","")
+                        for span_dict_details in spans_details:
+                                content_of_block_line = span_dict_details.get("content","")
+                                content_type_of_block = span_dict_details.get("type","")
+                                knowledge_unit = {"page_no.":page_no, "raw_content":content_of_block_line, "content type": para_label}
+                    content_list.append(knowledge_unit)
+
+                # Knowledge units of tabular content
+                elif para_label == "table":
+                    for table_block in table_blocks:
+                        table_block_lines = table_block.get("lines","")
+                        for lines_dict_details in table_block_lines:
+                            spans_details = lines_dict_details.get("spans","")
+                            for table_span_dict_details in spans_details:
+                                    table_of_block_line = table_span_dict_details.get("image_path","")
+                                    content_type_of_span = table_span_dict_details.get("type","")
+                                    
+                                    # Lets convert the relative path of the table image to the absolute path
+                                    ABS_table_of_block_line = ABS_PATH_OUTPUT.joinpath(f"images/{table_of_block_line}")
+                                    knowledge_unit = {"page_no.":page_no, "raw_content":ABS_table_of_block_line, "content_type": para_label}
+                                    if content_type_of_span not in  ["table"]:
+                                        continue
+                        content_list.append(knowledge_unit)
+                  
 
 
         # Let's fetch the complete information related to the metadata of the tables
+        """
+        ABS-PATH: "C:\\Users\\Hp\\MinerU"
 
-
-
+        1- If content type is table
+        2- Fetch the relative path of the table image from the minerU output.
+        3- Convert the relative path of the table image to the absolute path.
+        4- Store it to the extra knowledge units of tables
+        """
 
         return content_list
         
