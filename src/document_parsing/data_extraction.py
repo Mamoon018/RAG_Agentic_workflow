@@ -12,11 +12,11 @@ import json
 
 Class MinerU_Parser:
 
-    1- Parse_user_document
+    1- Parse_user_document (Done)
     2- Run_minerU (Done)
     3- Read_minerU_output (Done)
     4- Format_the_minerU_output (Done)
-    6- Check_installations
+    6- Check_installations (Done)
 
 """
 
@@ -256,6 +256,14 @@ def main():
     
     """
     minerU_testing = MinerU_Parser(data_file_path="C:\\Users\Hp\\Documents\\AI Projects docs\\RAG\\RAG_for_Anything.pdf")
+
+    check_installations = minerU_testing.check_minerU_installation()
+    if check_installations:
+        print("minerU is installed, and initiated successfully")
+    
+    if check_installations is False:
+        print("minerU is not installed in your system, please install minerU for document parsing!!")
+
 
     run_minerU = minerU_testing.run_minerU()
     read_minerU = minerU_testing.read_minerU_output()
