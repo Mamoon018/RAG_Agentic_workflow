@@ -57,23 +57,25 @@ def format_minerU_output():
             para_blocks = page.get("para_blocks","")
             for para_dict_details in para_blocks:
                 para_label = para_dict_details.get("type","")
-                table_blocks = para_dict_details.get("blocks","")
-                if para_label not in ["table", "text"]:
+                if para_label not in ["table", "text", "title"]:
                     continue
                 
                 # Knowledge units of textual content 
-                if para_label == "text":
+                if para_label in ["text", "title"]:
                     para_lines = para_dict_details.get("lines","")
                     for lines_dict_details in para_lines:
                         spans_details = lines_dict_details.get("spans","")
                         for span_dict_details in spans_details:
-                                content_of_block_line = span_dict_details.get("content","")
-                                content_type_of_block = span_dict_details.get("type","")
-                                knowledge_unit = {"page_no.":page_no, "raw_content":content_of_block_line, "content type": para_label}
-                    content_list.append(knowledge_unit)
+                                content_of_span = span_dict_details.get("content","")
+                                content_type_of_span = span_dict_details.get("type","")
+                                if content_type_of_span not in ["text"]:
+                                    continue
+                                knowledge_unit = {"page_no.":page_no, "raw_content":content_of_span, "content type": para_label}
+                                content_list.append(knowledge_unit)
 
                 # Knowledge units of tabular content
                 elif para_label == "table":
+                    table_blocks = para_dict_details.get("blocks","")
                     for table_block in table_blocks:
                         table_block_lines = table_block.get("lines","")
                         for lines_dict_details in table_block_lines:
@@ -81,25 +83,20 @@ def format_minerU_output():
                             for table_span_dict_details in spans_details:
                                     table_of_block_line = table_span_dict_details.get("image_path","")
                                     content_type_of_span = table_span_dict_details.get("type","")
-                                    
+                                    table_caption = table_span_dict_details.get("content","")
                                     # Lets convert the relative path of the table image to the absolute path
-                                    ABS_table_of_block_line = ABS_PATH_OUTPUT.joinpath(f"images/{table_of_block_line}")
-                                    knowledge_unit = {"page_no.":page_no, "raw_content":ABS_table_of_block_line, "content_type": para_label}
-                                    if content_type_of_span not in  ["table"]:
+
+                                    ABS_table_image_path = ABS_PATH_OUTPUT.joinpath(f"images/{table_of_block_line}")
+                                    if content_type_of_span not in  ["table", "text"]:
                                         continue
-                        content_list.append(knowledge_unit)
+                                    if content_type_of_span == "table":
+                                        knowledge_unit = {"page_no.":page_no, "table_image_path":ABS_table_image_path, "content_type": para_label}
+                                    if content_type_of_span == "text": 
+                                        knowledge_unit = {"page_no.":page_no, "table_caption":table_caption, "content_type": para_label}
+
+                                    content_list.append(knowledge_unit)
                   
 
-
-        # Let's fetch the complete information related to the metadata of the tables
-        """
-        ABS-PATH: "C:\\Users\\Hp\\MinerU"
-
-        1- If content type is table
-        2- Fetch the relative path of the table image from the minerU output.
-        3- Convert the relative path of the table image to the absolute path.
-        4- Store it to the extra knowledge units of tables
-        """
 
         return content_list
         

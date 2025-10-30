@@ -1,17 +1,31 @@
 
 
-"""
-        Features of content list: Content_list(content_data, content_type, content_metadata)
-        Accessing information required for the content list:
 
-        
-        1- PDF info contains the dict, which contains multiple "Paras" as strings of dictionaries.
-        2- Each "Para" contains the LIST of Dictionaries as value.
-        3- In the list, each dictionary contains "lines" as string.
-        4- lines contain the LIST of Dictionary as value.
-        5- Dictionary contains "Span" as string, and LIST of Dictionary as value.
-        6- Dictionary contains the "type" and "content" as string & their values represent the data type & raw content.
 """
+Text/Title:
+1- PDF info contains list, which contains the dict of blocks. It could be "dict of discard blocks" or "dict of para blocks".
+2- Discarded blocks are those which are breaking the continuity of the meaning for content. 
+3- Para blocks are the relevant as either it contains the textual content or non-textual content.
+4- For textual content, we are fetching titles (which are basically headings) or text (paragraphs)
+5- For para blocks that have the type "title", it contains the headings, and those with type "text" contains paragraphs.
+6- Para blocks with type either title or text, contain multiple dicts, each dict contain "lines".
+7- Each line contains the list of dict, will have only one span-value. 
+8- Span-value contains list, which has dict - which will contain the text of para.
+9- In this way, we have the multiple lines dicts, each containing span which further contains text content.
+
+
+Tables:
+1- PDF info contains list, which contains dict of blocks. In case of para blocks, it can have para block type as "table".
+2- This type of para_block, contains the multiple dicts, each contains blocks. 
+3- Each block contains multiple dicts, each dict contain "lines".
+7- Each line-value contains the list of dict, will have only one span-value. 
+8- Span-value contains list, which has dict - which will contain the table image path or table caption.
+9- In this way, it is possible that one line may contain the span for table caption, and other line may contain the span for image path.
+
+"""
+
+
+
 
 Parsed_minerU_raw = {
     "pdf_info": [
