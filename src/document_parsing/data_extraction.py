@@ -7,6 +7,7 @@ from pathlib import Path
 import time
 import json
 
+
 ## Parsing Module Workflow
 """
 
@@ -184,7 +185,7 @@ class MinerU_Parser():
                                     content_type_of_span = span_dict_details.get("type","")
                                     if content_type_of_span not in ["text"]:
                                         continue
-                                    knowledge_unit = {"page_no.":page_no, "raw_content":content_of_span, "content type": para_label}
+                                    knowledge_unit = {"page_no.":page_no, "raw_content":content_of_span, "content_type": para_label}
                                     content_list.append(knowledge_unit)
 
                     # Knowledge units of tabular content
@@ -200,7 +201,7 @@ class MinerU_Parser():
                                         table_caption = table_span_dict_details.get("content","")
                                         # Lets convert the relative path of the table image to the absolute path
 
-                                        ABS_table_image_path = ABS_PATH_OUTPUT.joinpath(f"images/{table_of_block_line}")
+                                        ABS_table_image_path = str(ABS_PATH_OUTPUT.joinpath(f"images/{table_of_block_line}"))
                                         if content_type_of_span not in  ["table", "text"]:
                                             continue
                                         if content_type_of_span == "table":
@@ -211,16 +212,15 @@ class MinerU_Parser():
                                         content_list.append(knowledge_unit)
                     
 
-
             return content_list
 
     # Lets create the method to check the installations
     def check_minerU_installation(self):
         """
-        This method checks the installation of the required tools to run the parser module. For parsing the document,
-        we need to have minerU installed in the system and therefore, it is important to check if the user has installed
-        it correctly or not. This is more like check function to ensure that the pre-requisites of running the program are
-        completed or not.        
+        This method checks the installation of the required tools to run the parser module. 
+        For parsing the document, we need to have minerU installed in the system and therefore, 
+        it is important to check if the user has installed it correctly or not. This is more 
+        like check function to ensure that the pre-requisites of running the program are completed or not.        
         
         """
         try:
@@ -246,29 +246,45 @@ class MinerU_Parser():
             return False
 
 
-# Lets run the module with the main function
+    # Lets run the module with the main function
 
-def main():
+    def parse_pdf_document(self):
 
-    """
-    This function takes the file from the user in order to parse it,
-    and also gives us its knowledge units. 
+        """
+        This function takes the file from the user in order to parse it,
+        and also gives us its knowledge units. 
+        
+        """
+        minerU_testing = MinerU_Parser(data_file_path=self.data_file_path)
+
+        check_installations = minerU_testing.check_minerU_installation()
+        if check_installations:
+            print("minerU is installed, and initiated successfully")
+        
+        if check_installations is False:
+            print("minerU is not installed in your system, please install minerU for document parsing!!")
+
+        run_minerU = minerU_testing.run_minerU()
+        read_minerU = minerU_testing.read_minerU_output()
+        knowledge_units_combined = minerU_testing.format_minerU_output()
+
+        return knowledge_units_combined
+
+
+file_path = knowledge_units_list="C:\\Users\Hp\\Documents\\AI Projects docs\\RAG\\RAG_for_Anything.pdf"
+
+def main(data_file):
+
+    # lets initialize the minerU class
+    minerU_testing = MinerU_Parser(data_file_path=data_file)
+
     
-    """
-    minerU_testing = MinerU_Parser(data_file_path="C:\\Users\Hp\\Documents\\AI Projects docs\\RAG\\RAG_for_Anything.pdf")
-
-    check_installations = minerU_testing.check_minerU_installation()
-    if check_installations:
-        print("minerU is installed, and initiated successfully")
-    
-    if check_installations is False:
-        print("minerU is not installed in your system, please install minerU for document parsing!!")
-
 
     run_minerU = minerU_testing.run_minerU()
     read_minerU = minerU_testing.read_minerU_output()
-    format_minerU = minerU_testing.format_minerU_output()
+    knowledge_units_combined = minerU_testing.format_minerU_output()
 
-    print(format_minerU)
+    return print(knowledge_units_combined)
 
-main()
+if __name__ == "__main__":
+    main(data_file=file_path)
